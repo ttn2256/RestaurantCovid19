@@ -36,9 +36,26 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/contactLayOut"
+            android:id="@+id/certLayOut"
             android:layout_marginTop="10dp"
             android:layout_below="@+id/autocomplete_fragment"
+            app:errorEnabled="true"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Food Certificate"
+                android:padding="10dp"
+                android:id="@+id/certificate" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/contactLayOut"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/certLayOut"
             app:errorEnabled="true"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 

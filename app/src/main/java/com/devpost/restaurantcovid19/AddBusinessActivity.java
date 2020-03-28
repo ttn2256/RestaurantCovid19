@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 
 import com.firebase.geofire.core.GeoHash;
 import com.google.android.gms.common.api.Status;
@@ -24,6 +26,7 @@ public class AddBusinessActivity extends AppCompatActivity {
     private Double savedLat, savedLong;
     private GeoHash geoHash;
     private Button btnRegister;
+    private Spinner cuisineList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,7 @@ public class AddBusinessActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_business);
 
         btnRegister = findViewById(R.id.btnRegister);
+        cuisineList = findViewById(R.id.listCuisines);
 
         //button register function
         btnRegister.setOnClickListener(new View.OnClickListener() {
@@ -39,6 +43,14 @@ public class AddBusinessActivity extends AppCompatActivity {
                 openMapsActivity();
             }
         });
+
+        //display drop down list
+        //create a list of items for the spinner.
+        String[] items = new String[]{"American Food", "Indian Food", "Asian Food", "European Food"
+                , "African Food", "Others"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        cuisineList.setAdapter(adapter);
+
 
         // get API key
         String apiKey = "AIzaSyC5tVRK4noWWEw7LgrfRpZ2LvM_otKNt7A";

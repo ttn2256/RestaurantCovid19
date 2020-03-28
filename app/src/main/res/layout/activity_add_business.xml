@@ -50,12 +50,21 @@
                 android:id="@+id/certificate" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <Spinner
+            android:id="@+id/listCuisines"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/certLayOut"
+            android:background="@android:drawable/btn_dropdown"
+            android:spinnerMode="dropdown"
+            android:autofillHints="Categories"/>
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/contactLayOut"
             android:layout_marginTop="10dp"
-            android:layout_below="@+id/certLayOut"
+            android:layout_below="@+id/listCuisines"
             app:errorEnabled="true"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 

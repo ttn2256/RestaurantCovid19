@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".AddBusinessActivity">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/editEventLayOut"
+            android:layout_marginTop="10dp"
+            app:errorEnabled="true"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Restaurant Name"
+                android:padding="10dp"
+                android:id="@+id/editEvent" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <fragment
+            android:id="@+id/autocomplete_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/editEventLayOut"
+            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/contactLayOut"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/autocomplete_fragment"
+            app:errorEnabled="true"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone Number"
+                android:padding="10dp"
+                android:id="@+id/contact" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/urlLayOut"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/contactLayOut"
+            app:errorEnabled="true"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="URL (Optional)"
+                android:padding="10dp"
+                android:id="@+id/url" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/startTimeLayOut"
+            android:layout_below="@+id/urlLayOut"
+            app:errorEnabled="true"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            <androidx.appcompat.widget.AppCompatEditText
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/startTime"
+                android:hint="Start Hours"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/endTimeLayOut"
+            android:layout_below="@+id/urlLayOut"
+            android:layout_alignLeft="@+id/startTimeLayOut"
+            android:layout_marginLeft="200dp"
+            app:errorEnabled="true"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/endTime"
+                android:hint="End Hours"
+                android:padding="10dp"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Order from car: "
+            android:id="@+id/order"
+            android:layout_below="@id/startTimeLayOut"
+            android:layout_marginLeft="5dp"
+            android:textSize="18.5dp" />
+
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/startTimeLayOut"
+            android:id="@+id/orderSwitch"
+            android:layout_alignLeft="@+id/order"
+            android:layout_marginLeft="300dp"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contact less delivery: "
+            android:id="@+id/contactLess"
+            android:layout_below="@id/order"
+            android:layout_marginLeft="5dp"
+            android:textSize="18.5dp"
+            android:layout_marginTop="22dp"/>
+
+        <ImageButton
+            android:id="@+id/contactLessInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:src="@drawable/ic_information"
+            android:layout_below="@id/order"
+            android:layout_marginTop="22dp"
+            android:layout_alignLeft="@id/contactLess"
+            android:layout_marginLeft="200dp" />
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/order"
+            android:id="@+id/contactSwitch"
+            android:layout_alignLeft="@+id/contactLess"
+            android:layout_marginLeft="300dp"
+            android:layout_marginTop="22dp"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/hiddenLayout"
+            android:layout_below="@+id/contactLess"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/etdLayOut"
+                app:errorEnabled="true"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etd"
+                    android:hint="Estimated Delivery Time (in minutes)"
+                    android:padding="10dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Single service items: "
+                android:id="@+id/serviceItems"
+                android:layout_marginLeft="5dp"
+                android:textSize="18.5dp"
+                android:layout_below="@id/etdLayOut"/>
+
+            <ImageButton
+                android:id="@+id/serviceItemsInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:src="@drawable/ic_information"
+                android:layout_alignLeft="@id/serviceItems"
+                android:layout_marginLeft="200dp"
+                android:layout_below="@id/etdLayOut"
+                android:layout_marginBottom="2dp"/>
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/itemSwitch"
+                android:layout_below="@id/etdLayOut"
+                android:layout_alignLeft="@+id/serviceItems"
+                android:layout_marginLeft="300dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Containers - Used: "
+                android:id="@+id/containerUse"
+                android:layout_marginLeft="5dp"
+                android:textSize="18.5dp"
+                android:layout_marginTop="20dp"
+                android:layout_below="@id/serviceItems"/>
+
+            <Spinner
+                android:id="@+id/containerList"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/serviceItems"
+                android:layout_marginTop="20dp"
+                android:layout_alignLeft="@+id/containerUse"
+                android:layout_marginLeft="180dp"
+                />
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Payment Method: "
+            android:id="@+id/paymentMethod"
+            android:layout_marginLeft="5dp"
+            android:textSize="18.5dp"
+            android:layout_marginTop="20dp"
+            android:layout_below="@+id/hiddenLayout"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/chipGroup"
+            android:layout_below="@+id/paymentMethod"
+            android:padding="10dp"/>
+
+        <Button
+            android:id="@+id/btnRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/chipGroup"
+            android:text= "Register restaurant"
+            android:layout_marginBottom="30dp"/>
+
+    </RelativeLayout>
+</ScrollView>

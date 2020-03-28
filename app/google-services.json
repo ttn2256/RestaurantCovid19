@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "587419253455",
+    "firebase_url": "https://covidres19.firebaseio.com",
+    "project_id": "covidres19",
+    "storage_bucket": "covidres19.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:587419253455:android:e89a045b391e17b65f55ba",
+        "android_client_info": {
+          "package_name": "com.devpost.restaurantcovid19"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "587419253455-vq4o8bukmrf82udqajiqgf4e3nvunj7p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5tVRK4noWWEw7LgrfRpZ2LvM_otKNt7A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "587419253455-vq4o8bukmrf82udqajiqgf4e3nvunj7p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

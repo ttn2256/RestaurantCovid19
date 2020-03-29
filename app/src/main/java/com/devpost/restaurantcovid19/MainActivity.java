@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnUsers, btnOwners;
     private FirebaseUser currentUser;
     private FirebaseAuth mAuth;
+//    private Button addBusiness;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
         //connect to xml
         btnUsers = findViewById(R.id.btnUser);
         btnOwners = findViewById(R.id.btnOwner);
+//        addBusiness = findViewById(R.id.fab_add);
+//        addBusiness.setVisibility(View.VISIBLE);
 
         //button owners function
         btnOwners.setOnClickListener(new View.OnClickListener() {
@@ -35,17 +38,16 @@ public class MainActivity extends AppCompatActivity {
                 SendUserToLoginActivity();
             }
         });
-
-
         //button user function
         btnUsers.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //TODO need to change this logic
+                mAuth.signOut();
                 openMapsActivity();
             }
         });
     }
-
 
     public void openMapsActivity() {
         Intent intent = new Intent(MainActivity.this, MapsActivity.class);

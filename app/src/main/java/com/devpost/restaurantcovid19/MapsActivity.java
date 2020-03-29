@@ -1,11 +1,5 @@
 package com.devpost.restaurantcovid19;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,14 +16,20 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import com.devpost.restaurantcovid19.Adapter.RestaurantInfoAdapter;
 import com.devpost.restaurantcovid19.Model.Business;
@@ -37,6 +37,11 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,25 +54,17 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleMap.OnMarkerClickListener, GeoQueryEventListener {
@@ -87,13 +84,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button safetyGrade;
     private ListView listInfo;
 
+    private FirebaseUser currentUser;
+    private FirebaseAuth mAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        //getting the logged in owner info
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setActionBar(toolbar);
         // connect to xm file
         btnAdd = findViewById(R.id.fab_add);
+        btnAdd.setVisibility(View.VISIBLE);
+        if(currentUser == null){
+            btnAdd.setVisibility(View.GONE);
+        }
         btnEditInfo = findViewById(R.id.btnEditInfo);
         name = findViewById(R.id.businessName);
         cuisine = findViewById(R.id.cuisine);
@@ -179,6 +188,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void openAddActivity() {
         Intent intent = new Intent(MapsActivity.this, AddBusinessActivity.class);
         startActivity(intent);
+    }
+
+    // For the three dot menu at the top of map
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+//         super.onCreateOptionsMenu(menu);
+
+        getMenuInflater().inflate(R.menu.options_menu, menu);
+        return true;
+    }
+
+    // Handling the logic when an owner will click on one of the options
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+         super.onOptionsItemSelected(item);
+
+         if(item.getItemId() == R.id.Logout){
+             mAuth.signOut();
+             SendUserToLoginActivity();
+         }
+         if(item.getItemId() == R.id.Edit){
+             //TODO
+             // We can send user to the Edit page here
+         }
+        return true;
+    }
+
+    private void SendUserToLoginActivity() {
+        Intent loginIntent = new Intent(MapsActivity.this, LoginActivity.class);
+        startActivity(loginIntent);
     }
 
     private void fetchLastLocation() {
@@ -569,4 +608,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onGeoQueryError(DatabaseError error) {
 
     }
+
 }

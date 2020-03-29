@@ -40,36 +40,16 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.login_activity_2);
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
-
-//        btnLogin = findViewById(R.id.btnLogin);
-//        txtEmail = findViewById(R.id.emailLogin);
-//        txtPwd = findViewById(R.id.pwdLogin);
-//        createAcc = findViewById(R.id.txtCreateAcc);
-//
-//
-//        //button login function
-//        btnLogin.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                openMapsActivity();
-//            }
-//        });
-
-//        //text view on click
-//        createAcc.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                openRegisterActivity();
-//            }
-//        });
+        /** Initialize all the fields of a current Business owner*/
         IntitalizeFields();
+        /** Send to registration page when clicked on NeedNewAccount*/
         NeedNewAccountLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 SendUserToRegisterActivity();
             }
         });
-
+        /** Adding user to the database*/
         LoginButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
@@ -79,6 +59,9 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Method that retrieves email and password and authenticate if successful. Throw an error otherwise.
+     */
     private void AllowUserToLogin() {
         String email = UserEmail.getText().toString();
         String password = UserPassword.getText().toString();
@@ -115,8 +98,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void IntitalizeFields() {
 
+
+    /* Initializing Authentication page info*/
+    private void IntitalizeFields() {
         LoginButton = findViewById(R.id.login_button);
         PhoneLoginButton = findViewById(R.id.phone_login_button);
         UserEmail = findViewById(R.id.login_email);
@@ -134,23 +119,27 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sending a user to map view upon successful registration/login
+     */
     private void SendUserToMainActivity() {
         Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(loginIntent);
     }
+    /**
+     * Sending a user to the registration page if clicked on "Need and account?"
+     */
     private void SendUserToRegisterActivity() {
         Intent RegisterIntent = new Intent(LoginActivity.this, RegisterActivity.class);
         startActivity(RegisterIntent);
     }
 
-
+    /**
+     * Sends a user to the map view
+     */
     public void openMapsActivity() {
         Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
         startActivity(intent);
     }
 
-    public void openRegisterActivity() {
-        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-        startActivity(intent);
-    }
 }

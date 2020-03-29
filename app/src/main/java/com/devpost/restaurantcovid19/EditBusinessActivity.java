@@ -1,11 +1,14 @@
 package com.devpost.restaurantcovid19;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+
 
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.TextUtils;
@@ -25,6 +28,7 @@ import com.devpost.restaurantcovid19.Model.Business;
 import com.devpost.restaurantcovid19.Model.GeoEvents;
 import com.firebase.geofire.core.GeoHash;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
@@ -33,21 +37,25 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public class AddBusinessActivity extends AppCompatActivity {
+public class EditBusinessActivity extends AppCompatActivity {
 
     private AutocompleteSupportFragment autocompleteFragment;
     private String savedPlace = null, g, amPm, namePlace;
     private Double savedLat, savedLong;
     private GeoHash geoHash;
-    private Button btnRegister;
+    private Button btnUpdate;
     private Spinner cuisineList, containerList;
     private ChipGroup chipGroup;
     private List<String> payment = new ArrayList<>();
@@ -64,15 +72,21 @@ public class AddBusinessActivity extends AppCompatActivity {
     private TextInputLayout nameLayout, certificateLayout, phoneLayout, locationLayout,
             startLayout, endLayout;
     private List<Double> l = new ArrayList<>();
+    private List<String> chipData = new ArrayList<>();
     private DatabaseReference mDataBusiness, mDataGeoFire;
-
+    private String[] methods = null, items = null, containers = null;
+    private String restaurantID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_business);
+        setContentView(R.layout.activity_edit_business);
 
-        btnRegister = findViewById(R.id.btnRegister);
+        //get the current intent
+        Intent intent = getIntent();
+        restaurantID = intent.getStringExtra("restaurantID");
+
+        btnUpdate = findViewById(R.id.btnUpdate);
         cuisineList = findViewById(R.id.listCuisines);
         containerList = findViewById(R.id.containerList);
         chipGroup = findViewById(R.id.chipGroup);
@@ -102,24 +116,17 @@ public class AddBusinessActivity extends AppCompatActivity {
         currentHour = calendar.get(Calendar.HOUR_OF_DAY);
         currentMinute = calendar.get(Calendar.MINUTE);
 
-        //button register function
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!validateData()) {
-                    saveInformation();
-                    openMapsActivity();
-                }
+        // connect to firebase
+        mDataBusiness = FirebaseDatabase.getInstance().getReference("Restaurants");
+        mDataGeoFire = FirebaseDatabase.getInstance().getReference("GeoFire");
 
-            }
-        });
 
-        // img button information
+        // iamge button information
 
         btnSingleServiceInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog alertDialog = new AlertDialog.Builder(AddBusinessActivity.this).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(EditBusinessActivity.this).create();
                 alertDialog.setTitle("Information");
                 //TODO: Ahbi add messages for single items service information
                 alertDialog.setMessage("");
@@ -136,7 +143,7 @@ public class AddBusinessActivity extends AppCompatActivity {
         btnContactLessInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog alertDialog = new AlertDialog.Builder(AddBusinessActivity.this).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(EditBusinessActivity.this).create();
                 alertDialog.setTitle("Information");
                 //TODO: Ahbi add messages for contact less information
                 alertDialog.setMessage("");
@@ -190,7 +197,7 @@ public class AddBusinessActivity extends AppCompatActivity {
 
         //display drop down list
         //create a list of items for the spinner.
-        String[] items = new String[]{"American Food", "Indian Food", "Asian Food", "European Food"
+        items = new String[]{"American Food", "Indian Food", "Asian Food", "European Food"
                 , "Latin Food", "African Food", "Others"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, items);
@@ -198,7 +205,7 @@ public class AddBusinessActivity extends AppCompatActivity {
 
         //create a list of items for the spinner.
         //TODO: Ahbi update containers uses list
-        String[] containers = new String[]{"None", "Plastic", "Paper"};
+        containers = new String[]{"None", "Plastic", "Paper"};
         ArrayAdapter<String> adapter1 = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, containers);
         containerList.setAdapter(adapter1);
@@ -247,7 +254,7 @@ public class AddBusinessActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    timePickerDialog = new TimePickerDialog(AddBusinessActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    timePickerDialog = new TimePickerDialog(EditBusinessActivity.this, new TimePickerDialog.OnTimeSetListener() {
                         @Override
                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                             if (hourOfDay >= 12) {
@@ -269,7 +276,7 @@ public class AddBusinessActivity extends AppCompatActivity {
         startEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                timePickerDialog = new TimePickerDialog(AddBusinessActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                timePickerDialog = new TimePickerDialog(EditBusinessActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                         if (hourOfDay >= 12) {
@@ -290,7 +297,7 @@ public class AddBusinessActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    timePickerDialog = new TimePickerDialog(AddBusinessActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    timePickerDialog = new TimePickerDialog(EditBusinessActivity.this, new TimePickerDialog.OnTimeSetListener() {
                         @Override
                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                             if (hourOfDay >= 12) {
@@ -311,7 +318,7 @@ public class AddBusinessActivity extends AppCompatActivity {
         endEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                timePickerDialog = new TimePickerDialog(AddBusinessActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                timePickerDialog = new TimePickerDialog(EditBusinessActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                         if (hourOfDay >= 12) {
@@ -327,21 +334,68 @@ public class AddBusinessActivity extends AppCompatActivity {
             }
         });
 
-        String[] methods = {"Credit card", "Venmo", "Paypal", "Zelle",
+        // display chip
+        methods = new String[] {"Credit card", "Venmo", "Paypal", "Zelle",
                 "Apple Pay", "Google Pay"};
-        // display list of tags in chip
-        for(String method : methods) {
-            chipDisplay(method);
-        }
 
-        // connect to firebase
-        mDataBusiness = FirebaseDatabase.getInstance().getReference("Restaurants");
-        mDataGeoFire = FirebaseDatabase.getInstance().getReference("GeoFire");
+        // display data
+        final Query locationDataQuery = FirebaseDatabase.getInstance().getReference("Restaurants")
+                .orderByKey().equalTo(restaurantID);
+        locationDataQuery.addValueEventListener(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot s : dataSnapshot.getChildren()) {
+                    final Business business = s.getValue(Business.class);
+                    autocompleteFragment.setText(business.locationName);
+                    namePlace = business.locationName;
+                    savedPlace = business.address;
+                    savedLat = business.getL().get(0);
+                    savedLong = business.getL().get(1);
+                    geoHash = new GeoHash(savedLat, savedLong);
+                    nameEdit.setText(business.name);
+                    certificateEdit.setText(business.cert);
+                    cuisineList.setSelection(Arrays.asList(items).indexOf(business.cuisine));
+                    phoneEdit.setText(business.phone);
+                    urlEdit.setText(business.url);
+                    startEdit.setText(business.start);
+                    endEdit.setText(business.end);
+                    orderSwitch.setChecked(business.orderFromCar);
+                    contactSwitch.setChecked(business.contactLess);
+                    etdEdit.setText(business.etd);
+                    itemSwitch.setChecked(business.singleServiceItem);
+                    containerList.setSelection(Arrays.asList(containers).indexOf(business.containerUsed));
+                    for (String pm: business.payment) {
+                        chipData.add(pm);
+                    }
+                    for(String method : methods) {
+                        chipDisplay(method);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        //button update function
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!validateData()) {
+                    saveInformation();
+                    openMapsActivity();
+                }
+
+            }
+        });
 
     }
 
     public void openMapsActivity() {
-        Intent intent = new Intent(AddBusinessActivity.this, MapsActivity.class);
+        Intent intent = new Intent(EditBusinessActivity.this, MapsActivity.class);
         startActivity(intent);
     }
 
@@ -398,8 +452,8 @@ public class AddBusinessActivity extends AppCompatActivity {
 
 
     private void chipDisplay(final String tag) {
-        final Chip chip = new Chip(AddBusinessActivity.this);
-        ChipDrawable chipDrawable = ChipDrawable.createFromAttributes(AddBusinessActivity.this,
+        final Chip chip = new Chip(EditBusinessActivity.this);
+        ChipDrawable chipDrawable = ChipDrawable.createFromAttributes(EditBusinessActivity.this,
                 null, 0, R.style.Widget_MaterialComponents_Chip_Entry);
         chip.setChipDrawable(chipDrawable);
         chip.setCheckable(true);
@@ -407,6 +461,11 @@ public class AddBusinessActivity extends AppCompatActivity {
         chip.setCloseIconVisible(false);
         chip.setPadding(60, 10, 60,10);
         chip.setText(tag);
+
+        if (chipData != null && !chipData.isEmpty() && chipData.contains(tag)) {
+            chip.setChecked(true);
+            payment.add(tag);
+        }
 
         chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -427,25 +486,17 @@ public class AddBusinessActivity extends AppCompatActivity {
         l.add(savedLat);
         l.add(savedLong);
         g = geoHash.getGeoHashString();
-        if (urlString != null || !urlString.isEmpty()) {
-            if (!urlString.startsWith("www.")) {
-                urlString = "https://www." + urlString.toLowerCase();
-            } else if (!urlString.startsWith("https://")){
-                urlString = "https://" + urlString.toLowerCase();
-            }
-        }
 
+        Log.i("URL String", urlString);
         String cuisine = cuisineList.getSelectedItem().toString();
         String container = containerList.getSelectedItem().toString();
         Business businessInfo = new Business(nameString, namePlace, savedPlace,
                 l, certficateString, cuisine, phoneString, urlString, startString,
                 endString, order, contact, etdString, item, container, payment);
         GeoEvents geoEvents = new GeoEvents(l, g);
-        DatabaseReference addData = mDataBusiness.push();
-        String key = addData.getKey();
         // add event to database
-        addData.setValue(businessInfo);
+        mDataBusiness.child(restaurantID).setValue(businessInfo);
         // add geo information of the events into geo Fire
-        mDataGeoFire.child(key).setValue(geoEvents);
+        mDataGeoFire.child(restaurantID).setValue(geoEvents);
     }
 }

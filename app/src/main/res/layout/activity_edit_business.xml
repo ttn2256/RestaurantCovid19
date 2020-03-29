@@ -89,7 +89,7 @@
             <androidx.appcompat.widget.AppCompatEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Food Service License"
+                android:hint="Food Grade (A, B, C or P as Pending)"
                 android:padding="10dp"
                 android:id="@+id/certificate" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -246,7 +246,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Single service items: "
+                android:text="Single service articles: "
                 android:id="@+id/serviceItems"
                 android:layout_marginLeft="5dp"
                 android:textSize="18.5dp"

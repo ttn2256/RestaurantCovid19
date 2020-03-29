@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         if(currentUser != null){
-            Log.i("currentUser", currentUser.getUid());
+            openMapsActivity();
         }
 
     }

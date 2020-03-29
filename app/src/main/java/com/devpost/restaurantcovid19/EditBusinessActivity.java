@@ -435,6 +435,11 @@ public class EditBusinessActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        // super.onBackPressed();
+    }
+
     public void openMapsActivity() {
         Intent intent = new Intent(EditBusinessActivity.this, MapsActivity.class);
         startActivity(intent);

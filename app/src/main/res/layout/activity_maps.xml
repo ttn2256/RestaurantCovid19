@@ -38,24 +38,28 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             app:backgroundTint="@color/colorAccent"
-            app:srcCompat="@drawable/ic_add" />
+            app:srcCompat="@drawable/ic_add"
+            app:tint="@color/colorIcon"/>
 
-<!--        <android.support.v7.widget.Toolbar-->
-<!--            android:id="@+id/toolbar"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:backgroundTint="@color/colorAccent"-->
-<!--            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"-->
-<!--            app:title="Demo toolbar"-->
-<!--            app:titleMarginStart="40dp"-->
-<!--            app:srcCompat="@drawable/ic_add"-->
-<!--            />-->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            app:backgroundTint="@color/colorRed"
+            app:tint="@color/colorIcon"/>
+
+
+
     </RelativeLayout>
     <!-- SLIDING LAYOUT -->
     <LinearLayout
         android:id="@+id/dragView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="460dp"
         android:background="@android:color/white"
         android:orientation="vertical">
 
@@ -74,18 +78,18 @@
                 android:id="@+id/businessName"/>
 
             <Button
-                android:id="@+id/scoreSafe"
+                android:id="@+id/foodSafe"
                 android:layout_marginTop="5dp"
                 android:layout_width="60dp"
-                android:layout_marginLeft="267dp"
+                android:layout_marginLeft="280dp"
                 android:layout_height="60dp"
                 android:layout_alignLeft="@+id/businessName"/>
 
             <Button
-                android:id="@+id/safetyGrade"
+                android:id="@+id/foodGrade"
                 android:layout_marginTop="5dp"
                 android:layout_width="60dp"
-                android:layout_marginLeft="330dp"
+                android:layout_marginLeft="340dp"
                 android:layout_height="60dp"
                 android:layout_alignLeft="@+id/businessName"/>
 
@@ -98,38 +102,45 @@
                 android:textColor="@color/quantum_black_100"
                 android:divider="?android:attr/dividerHorizontal"
                 android:id="@+id/cuisine"/>
+
+            <TextView
+                android:id="@+id/openingHours"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@color/quantum_black_100"
+                android:layout_below="@+id/businessName"
+                android:layout_alignLeft="@+id/cuisine"
+                android:layout_marginLeft="150dp"
+                android:textStyle="bold"
+                />
         </RelativeLayout>
 
-        <ListView
-            android:id="@+id/listInfo"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:divider="@null"
-            android:dividerHeight="0dp" >
-        </ListView>
+            android:layout_height="550dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <ListView
+                    android:id="@+id/listInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="320dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:divider="@null"
+                    android:dividerHeight="0dp" >
+                </ListView>
+                <Button
+                    android:layout_marginTop="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnEditInfo"
+                    android:text="EDIT BUSINESS INFO" />
+            </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/orderFromCar"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/contactLess"/>
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/payment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnEditInfo"
-            android:text="EDIT BUSINESS INFO" />
+        </ScrollView>
 
     </LinearLayout>
 

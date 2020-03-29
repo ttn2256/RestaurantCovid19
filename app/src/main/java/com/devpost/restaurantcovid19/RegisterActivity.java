@@ -29,16 +29,8 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.register_activity_2);
+        setContentView(R.layout.activity_register);
 
-//        btnCreate = findViewById(R.id.btnCreate);
-//
-//        btnCreate.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                openLoginActivity();
-//            }
-//        });
         mAuth= FirebaseAuth.getInstance();
         IntitializeFields();
 
@@ -101,10 +93,6 @@ public class RegisterActivity extends AppCompatActivity {
         loadingBar = new ProgressDialog(this);
     }
 
-    public void openLoginActivity() {
-        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-        startActivity(intent);
-    }
     private void SendUserToLoginActivity() {
         Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
         startActivity(loginIntent);

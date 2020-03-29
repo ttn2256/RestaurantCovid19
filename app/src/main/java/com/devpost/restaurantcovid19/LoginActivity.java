@@ -16,20 +16,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
-    TextInputEditText txtEmail, txtPwd;
-    TextView createAcc;
-    Button btnLogin;
     private FirebaseUser currentUser;
     private FirebaseAuth mAuth;
     private ProgressDialog loadingBar;
-    private Button LoginButton, PhoneLoginButton;
+    private Button LoginButton, PhoneLoginButton, BackButton;
     private EditText UserEmail, UserPassword;
     private TextView NeedNewAccountLink, ForgetPasswordLink;
 
@@ -37,7 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login_activity_2);
+        setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         /** Initialize all the fields of a current Business owner*/
@@ -57,6 +53,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        BackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SendUserToMainActivity();
+            }
+        });
     }
 
     /**
@@ -102,6 +104,7 @@ public class LoginActivity extends AppCompatActivity {
 
     /* Initializing Authentication page info*/
     private void IntitalizeFields() {
+        BackButton = findViewById(R.id.backButton);
         LoginButton = findViewById(R.id.login_button);
         PhoneLoginButton = findViewById(R.id.phone_login_button);
         UserEmail = findViewById(R.id.login_email);

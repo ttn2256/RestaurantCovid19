@@ -1,6 +1,8 @@
 package com.devpost.restaurantcovid19;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -16,9 +18,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -27,6 +31,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -64,6 +69,10 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
@@ -77,12 +86,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location currentLocation;
     private DatabaseReference mDataBusiness, mDataGeoFire;
     private static final int REQUEST_CODE = 101;
-    private FloatingActionButton btnAdd;
+    private FloatingActionButton btnAdd, btnUser;
     private Button btnEditInfo;
     private SlidingUpPanelLayout dragLayout;
-    private TextView name, cuisine;
-    private Button safetyGrade, scoreSafe;
+    private TextView name, cuisine, openingHours;
+    private Button foodGrade, scoreSafe;
     private ListView listInfo;
+    private Calendar calendar;
+    private String current;
+    private long currentTime;
 
     private FirebaseUser currentUser;
     private FirebaseAuth mAuth;
@@ -95,22 +107,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //getting the logged in owner info
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
-//        Toolbar toolbar = findViewById(R.id.toolbar);
-//        setActionBar(toolbar);
-        // connect to xm file
+
+        // check if current User is existed or not
         btnAdd = findViewById(R.id.fab_add);
-        btnAdd.setVisibility(View.VISIBLE);
-        if(currentUser == null){
+        btnUser = findViewById(R.id.fab_user);
+        if (currentUser != null){
+            String email = currentUser.getEmail().charAt(0) + "";
+            btnUser.setImageBitmap(textToBitmap(email.toUpperCase()));
+            btnUser.setVisibility(View.VISIBLE);
+            btnAdd.setVisibility(View.VISIBLE);
+        } else {
             btnAdd.setVisibility(View.GONE);
+            btnUser.setVisibility(View.GONE);
         }
+
         btnEditInfo = findViewById(R.id.btnEditInfo);
         name = findViewById(R.id.businessName);
         cuisine = findViewById(R.id.cuisine);
-        safetyGrade = findViewById(R.id.safetyGrade);
-        scoreSafe = findViewById(R.id.scoreSafe);
+        openingHours = findViewById(R.id.openingHours);
+        foodGrade = findViewById(R.id.foodGrade);
+        scoreSafe = findViewById(R.id.foodSafe);
         listInfo = findViewById(R.id.listInfo);
-
         dragLayout = findViewById(R.id.sliding_layout);
+
+        // btnUser function
+        btnUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(MapsActivity.this).create();
+                alertDialog.setTitle("Sign Out");
+                alertDialog.setMessage("Do you want to sign out?");
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                mAuth.signOut();
+                                SendUserToLoginActivity();
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
 
         // btn add function
         btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -136,6 +179,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         fetchLastLocation();
 
+        // check time
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        calendar = Calendar.getInstance();
+        current = calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE);
+        try {
+            Date timeT = sdf.parse(current);
+            currentTime = timeT.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void onBackPressed() {
+         if (currentUser == null) {
+             super.onBackPressed();
+         }
     }
 
     /**
@@ -189,31 +250,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void openAddActivity() {
         Intent intent = new Intent(MapsActivity.this, AddBusinessActivity.class);
         startActivity(intent);
-    }
-
-    // For the three dot menu at the top of map
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-//         super.onCreateOptionsMenu(menu);
-
-        getMenuInflater().inflate(R.menu.options_menu, menu);
-        return true;
-    }
-
-    // Handling the logic when an owner will click on one of the options
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-         super.onOptionsItemSelected(item);
-
-         if(item.getItemId() == R.id.Logout){
-             mAuth.signOut();
-             SendUserToLoginActivity();
-         }
-         if(item.getItemId() == R.id.Edit){
-             //TODO
-             // We can send user to the Edit page here
-         }
-        return true;
     }
 
     private void SendUserToLoginActivity() {
@@ -291,8 +327,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean onMarkerClick(final Marker marker) {
 
         dragLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        btnEditInfo.setVisibility(View.VISIBLE);
+        if(currentUser == null){
+            btnEditInfo.setVisibility(View.GONE);
+            ViewGroup.LayoutParams params = listInfo.getLayoutParams();
+            params.height = 1000;
+            listInfo.setLayoutParams(params);
+        }
 
-        // disable editInfo button if users use create the event
+
+        //btn food grade display information dialog
+        foodGrade.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(MapsActivity.this).create();
+                alertDialog.setTitle("FDA Food Grade Information");
+                alertDialog.setMessage("This letter indicates food grade approve by the FDA. " +
+                        "Food grade means that the material is either safe for human consumption " +
+                        "or it is okay to come into direct contact with food products.");
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
+
+        // btn food safety display information dialog
+
+        scoreSafe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(MapsActivity.this).create();
+                alertDialog.setTitle("Food Inspection Score Information");
+                alertDialog.setMessage("This number indicates food inspection score. " +
+                        "If it displays N/A, it means that there is no latest score. " +
+                        "Food safe means that a food-grade material is also suitable " +
+                        "for its intended use and will not create a food-safety hazard.");
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
 
         // display information from markers title as event id
         final Query locationDataQuery = FirebaseDatabase.getInstance().getReference("Restaurants")
@@ -308,8 +390,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     } else {
                         name.setText(business.name);
                     }
-                    //display safty score
-
+                    //display safety score
                     if (business.safetyScore.equals("N/A")) {
                         scoreSafe.setBackgroundColor(getResources().getColor(R.color.quantum_grey));
                         scoreSafe.setTextSize(20);
@@ -331,18 +412,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     // display food service license
                     if (business.cert.equals("A")) {
-                        safetyGrade.setBackgroundColor(getResources().getColor(R.color.quantum_googgreen));
+                        foodGrade.setBackgroundColor(getResources().getColor(R.color.quantum_googgreen));
                     } else if (business.cert.equals("B")) {
-                        safetyGrade.setBackgroundColor(getResources().getColor(R.color.quantum_yellow));
+                        foodGrade.setBackgroundColor(getResources().getColor(R.color.quantum_yellow));
                     } else if (business.cert.equals("C")) {
-                        safetyGrade.setBackgroundColor(getResources().getColor(R.color.quantum_googred));
+                        foodGrade.setBackgroundColor(getResources().getColor(R.color.quantum_googred));
                     } else {
-                        safetyGrade.setBackgroundColor(getResources().getColor(R.color.quantum_grey));
+                        foodGrade.setBackgroundColor(getResources().getColor(R.color.quantum_grey));
                     }
 
-                    safetyGrade.setText(business.cert);
-                    safetyGrade.setTextSize(30);
-                    safetyGrade.setTextColor(getResources().getColor(R.color.quantum_white_100));
+                    foodGrade.setText(business.cert);
+                    foodGrade.setTextSize(30);
+                    foodGrade.setTextColor(getResources().getColor(R.color.quantum_white_100));
 
                     cuisine.setText(business.cuisine);
                     // get name, location and category from firebase
@@ -352,6 +433,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     phone = business.phone;
                     url = business.url;
                     hours = business.start + " - " + business.end;
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+                    try {
+                        Date timeS = sdf.parse(business.start);
+                        Date timeE = sdf.parse(business.end);
+                        long startT = timeS.getTime();
+                        long endT = timeE.getTime();
+
+                        if (currentTime > startT && currentTime < endT) {
+                            openingHours.setText("[OPEN]");
+                            openingHours.setTextColor(getResources().getColor(R.color.quantum_googgreen));
+                        } else {
+                            openingHours.setText("[CLOSED]");
+                            openingHours.setTextColor(getResources().getColor(R.color.quantum_googred));
+                        }
+
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+
+
                     etd = business.etd;
                     List<String> paymentM = business.payment;
 
@@ -382,52 +485,88 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 + singleItem + "\n \n"
                                 + "Containers: " + business.containerUsed;
                     }
-                    final String[] restaurantInfo = {address, phone, url, hours, driveThru, contactLess, payment};
-                    Integer[] imgid = {
-                            R.drawable.ic_location,
-                            R.drawable.ic_phone,
-                            R.drawable.ic_url,
-                            R.drawable.ic_hours,
-                            R.drawable.ic_car,
-                            R.drawable.ic_contactless,
-                            R.drawable.ic_payment
-                    };
-                    RestaurantInfoAdapter adapter = new RestaurantInfoAdapter(
-                            MapsActivity.this, restaurantInfo, imgid);
-                    listInfo.setAdapter(adapter);
 
-                    listInfo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view,
-                                                int position, long id) {
-                            if (position == 2) {
-                                String selectedItem = restaurantInfo[position];
-                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedItem));
-                                startActivity(intent);
-                            } else if (position == 0) {
-                                String selectedItem = "http://maps.google.co.in/maps?q=" + restaurantInfo[position];
-                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedItem));
-                                startActivity(intent);
-                            } else if (position == 1) {
-                                String selectItem = "tel:" + restaurantInfo[position];
-                                Intent intent = new Intent(Intent.ACTION_CALL);
-                                intent.setData(Uri.parse(selectItem));
-                                if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                                    // TODO: Consider calling
-                                    //    ActivityCompat#requestPermissions
-                                    // here to request the missing permissions, and then overriding
-                                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                    //                                          int[] grantResults)
-                                    // to handle the case where the user grants the permission. See the documentation
-                                    // for ActivityCompat#requestPermissions for more details.
-                                    ActivityCompat.requestPermissions(MapsActivity.this,
-                                            new String[]{Manifest.permission.CALL_PHONE}, REQUEST_CODE);
-                                    return;
+
+                    if (business.url.equals("https://www.")) {
+                        final String[] restaurantInfo = {address, phone, hours, driveThru, contactLess, payment};
+                        Integer[] imgid = {
+                                R.drawable.ic_location,
+                                R.drawable.ic_phone,
+                                R.drawable.ic_hours,
+                                R.drawable.ic_car,
+                                R.drawable.ic_contactless,
+                                R.drawable.ic_payment
+                        };
+
+                        RestaurantInfoAdapter adapter = new RestaurantInfoAdapter(
+                                MapsActivity.this, restaurantInfo, imgid);
+                        listInfo.setAdapter(adapter);
+
+                        listInfo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view,
+                                                    int position, long id) {
+                                if (position == 0) {
+                                    String selectedItem = "http://maps.google.co.in/maps?q=" + restaurantInfo[position];
+                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedItem));
+                                    startActivity(intent);
+                                } else if (position == 1) {
+                                    String selectItem = "tel:" + restaurantInfo[position];
+                                    Intent intent = new Intent(Intent.ACTION_CALL);
+                                    intent.setData(Uri.parse(selectItem));
+                                    if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                                        ActivityCompat.requestPermissions(MapsActivity.this,
+                                                new String[]{Manifest.permission.CALL_PHONE}, REQUEST_CODE);
+                                        return;
+                                    }
+                                    startActivity(intent);
                                 }
-                                startActivity(intent);
                             }
-                        }
-                    });
+                        });
+
+
+                    } else {
+                        final String[] restaurantInfo = {address, phone, url, hours, driveThru, contactLess, payment};
+                        Integer[] imgid = {
+                                R.drawable.ic_location,
+                                R.drawable.ic_phone,
+                                R.drawable.ic_url,
+                                R.drawable.ic_hours,
+                                R.drawable.ic_car,
+                                R.drawable.ic_contactless,
+                                R.drawable.ic_payment
+                        };
+
+                        RestaurantInfoAdapter adapter = new RestaurantInfoAdapter(
+                                MapsActivity.this, restaurantInfo, imgid);
+                        listInfo.setAdapter(adapter);
+
+                        listInfo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view,
+                                                    int position, long id) {
+                                if (position == 2) {
+                                    String selectedItem = restaurantInfo[position];
+                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedItem));
+                                    startActivity(intent);
+                                } else if (position == 0) {
+                                    String selectedItem = "http://maps.google.co.in/maps?q=" + restaurantInfo[position];
+                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedItem));
+                                    startActivity(intent);
+                                } else if (position == 1) {
+                                    String selectItem = "tel:" + restaurantInfo[position];
+                                    Intent intent = new Intent(Intent.ACTION_CALL);
+                                    intent.setData(Uri.parse(selectItem));
+                                    if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                                        ActivityCompat.requestPermissions(MapsActivity.this,
+                                                new String[]{Manifest.permission.CALL_PHONE}, REQUEST_CODE);
+                                        return;
+                                    }
+                                    startActivity(intent);
+                                }
+                            }
+                        });
+                    }
                 }
             }
 
@@ -543,6 +682,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Bitmap marker = Bitmap.createScaledBitmap(b, width, height, false);
 
         return marker;
+    }
+
+    private Bitmap textToBitmap (String text) {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTextSize(70);
+        float baseline = -paint.ascent();
+        int width = (int) (paint.measureText(text) + 0.5f);
+        int height = (int) (baseline + paint.descent() + 0.5f);
+        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(image);
+        canvas.drawText(text, 0, baseline, paint);
+        return image;
     }
 
     /**

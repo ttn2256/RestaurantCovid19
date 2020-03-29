@@ -53,7 +53,7 @@ public class AddBusinessActivity extends AppCompatActivity {
     private String savedPlace = null, g, amPm, namePlace;
     private Double savedLat, savedLong;
     private GeoHash geoHash;
-    private Button btnRegister;
+    private Button btnRegister, btnBack;
     private Spinner cuisineList, containerList;
     private ChipGroup chipGroup;
     private List<String> payment = new ArrayList<>();
@@ -97,6 +97,7 @@ public class AddBusinessActivity extends AppCompatActivity {
         etdEdit = findViewById(R.id.etd);
         btnContactLessInfo = findViewById(R.id.contactLessInfo);
         btnSingleServiceInfo = findViewById(R.id.serviceItemsInfo);
+        btnBack = findViewById(R.id.backButton);
         scoreTV = findViewById(R.id.scoreTV);
 
         hidden = findViewById(R.id.hiddenLayout);
@@ -129,6 +130,15 @@ public class AddBusinessActivity extends AppCompatActivity {
             }
         });
 
+
+        //button back function
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMapsActivity();
+            }
+        });
+
         // img button information
 
         btnSingleServiceInfo.setOnClickListener(new View.OnClickListener() {
@@ -137,7 +147,11 @@ public class AddBusinessActivity extends AppCompatActivity {
                 AlertDialog alertDialog = new AlertDialog.Builder(AddBusinessActivity.this).create();
                 alertDialog.setTitle("Information");
                 //TODO: Ahbi add messages for single items service information
-                alertDialog.setMessage("");
+                alertDialog.setMessage(
+                        "Single-service articles means tableware, carry-out utensils, and other items such as bags, " +
+                        "containers, placemats, stirrers, straws, " +
+                        "toothpicks, and wrappers that are designed and constructed for one time, " +
+                        "one person use after which they are intended for discard.");
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -212,8 +226,8 @@ public class AddBusinessActivity extends AppCompatActivity {
         cuisineList.setAdapter(adapter);
 
         //create a list of items for the spinner.
-        //TODO: Ahbi update containers uses list
-        String[] containers = new String[]{"None", "Plastic", "Paper"};
+        String[] containers = new String[]{"None", "Recycled Paperboard", "Bio Plastic",
+        "Plastic #2", "Plastic #5", "Brown Cardboard"};
         ArrayAdapter<String> adapter1 = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, containers);
         containerList.setAdapter(adapter1);
@@ -239,23 +253,25 @@ public class AddBusinessActivity extends AppCompatActivity {
                 placeSplit = savedPlace.split(",");
                 street = placeSplit[0];
                 scoreTV.setText("Retrieving score...");
-                Query scoreDataQuery = mDataScore.orderByChild("2").equalTo(street).limitToFirst(1);
+                Query scoreDataQuery = mDataScore.orderByChild("2").equalTo(street);
                 scoreDataQuery.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot s : dataSnapshot.getChildren()){
-                                if (s.child("12").getValue().getClass().equals(String.class)) {
-                                    String score = s.child("12").getValue(String.class);
-                                    if (score.isEmpty()) {
-                                        scoreTV.setText("N/A");
-                                    } else {
-                                        scoreTV.setText(score);
-                                    }
-                                } else {
-                                    Long score = s.child("12").getValue(Long.class);
-                                    scoreTV.setText(String.valueOf(score));
-                                }
+//                                if (s.child("12").getValue().getClass().equals(String.class)) {
+//                                    String score = s.child("12").getValue(String.class);
+//                                    if (score.isEmpty()) {
+//                                        scoreTV.setText("N/A");
+//                                    } else {
+//                                        scoreTV.setText(score);
+//                                    }
+//                                } else {
+//                                    Long score = s.child("12").getValue(Long.class);
+//                                    scoreTV.setText(String.valueOf(score));
+//                                }
+                               Log.i("Data", String.valueOf(s));
+
                             }
                         } else {
                             scoreTV.setText("N/A");
@@ -380,6 +396,11 @@ public class AddBusinessActivity extends AppCompatActivity {
             chipDisplay(method);
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        // super.onBackPressed();
     }
 
     public void openMapsActivity() {

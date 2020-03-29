@@ -40,7 +40,16 @@
             app:backgroundTint="@color/colorAccent"
             app:srcCompat="@drawable/ic_add" />
 
-
+<!--        <android.support.v7.widget.Toolbar-->
+<!--            android:id="@+id/toolbar"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:backgroundTint="@color/colorAccent"-->
+<!--            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"-->
+<!--            app:title="Demo toolbar"-->
+<!--            app:titleMarginStart="40dp"-->
+<!--            app:srcCompat="@drawable/ic_add"-->
+<!--            />-->
     </RelativeLayout>
     <!-- SLIDING LAYOUT -->
     <LinearLayout

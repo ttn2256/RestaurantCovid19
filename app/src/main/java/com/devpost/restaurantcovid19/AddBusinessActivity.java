@@ -1,5 +1,6 @@
 package com.devpost.restaurantcovid19;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
@@ -19,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.devpost.restaurantcovid19.Model.Business;
@@ -33,8 +35,12 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,12 +66,14 @@ public class AddBusinessActivity extends AppCompatActivity {
     private Calendar calendar;
     private int currentHour, currentMinute;
     private String nameString, certficateString, phoneString,
-            urlString, startString, endString, etdString;
+            urlString, startString, endString, etdString, street, scoreString;
+    private String[] placeSplit;
     private TextInputLayout nameLayout, certificateLayout, phoneLayout, locationLayout,
-            startLayout, endLayout;
+            startLayout, endLayout, scoreLayout;
     private List<Double> l = new ArrayList<>();
-    private DatabaseReference mDataBusiness, mDataGeoFire;
-
+    private DatabaseReference mDataBusiness, mDataGeoFire, mDataScore;
+    private TextView scoreTV;
+    private boolean error = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +97,7 @@ public class AddBusinessActivity extends AppCompatActivity {
         etdEdit = findViewById(R.id.etd);
         btnContactLessInfo = findViewById(R.id.contactLessInfo);
         btnSingleServiceInfo = findViewById(R.id.serviceItemsInfo);
+        scoreTV = findViewById(R.id.scoreTV);
 
         hidden = findViewById(R.id.hiddenLayout);
         nameLayout = findViewById(R.id.editNameLayOut);
@@ -97,16 +106,22 @@ public class AddBusinessActivity extends AppCompatActivity {
         startLayout = findViewById(R.id.startTimeLayOut);
         endLayout = findViewById(R.id.endTimeLayOut);
         locationLayout = findViewById(R.id.locationLayOut);
+        scoreLayout = findViewById(R.id.scoreLayOut);
 
         calendar = Calendar.getInstance();
         currentHour = calendar.get(Calendar.HOUR_OF_DAY);
         currentMinute = calendar.get(Calendar.MINUTE);
 
+        // connect to firebase
+        mDataBusiness = FirebaseDatabase.getInstance().getReference("Restaurants");
+        mDataGeoFire = FirebaseDatabase.getInstance().getReference("GeoFire");
+        mDataScore = FirebaseDatabase.getInstance().getReference("masterSheet");
+
         //button register function
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!validateData()) {
+                if (validateData() == false) {
                     saveInformation();
                     openMapsActivity();
                 }
@@ -221,6 +236,37 @@ public class AddBusinessActivity extends AppCompatActivity {
             public void onPlaceSelected(Place place) {
                 namePlace = String.valueOf(place.getName());
                 savedPlace = String.valueOf(place.getAddress());
+                placeSplit = savedPlace.split(",");
+                street = placeSplit[0];
+                scoreTV.setText("Retrieving score...");
+                Query scoreDataQuery = mDataScore.orderByChild("2").equalTo(street).limitToFirst(1);
+                scoreDataQuery.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot s : dataSnapshot.getChildren()){
+                                if (s.child("12").getValue().getClass().equals(String.class)) {
+                                    String score = s.child("12").getValue(String.class);
+                                    if (score.isEmpty()) {
+                                        scoreTV.setText("N/A");
+                                    } else {
+                                        scoreTV.setText(score);
+                                    }
+                                } else {
+                                    Long score = s.child("12").getValue(Long.class);
+                                    scoreTV.setText(String.valueOf(score));
+                                }
+                            }
+                        } else {
+                            scoreTV.setText("N/A");
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
                 savedLat = place.getLatLng().latitude;
                 savedLong = place.getLatLng().longitude;
                 geoHash = new GeoHash(place.getLatLng().latitude, place.getLatLng().longitude);
@@ -334,10 +380,6 @@ public class AddBusinessActivity extends AppCompatActivity {
             chipDisplay(method);
         }
 
-        // connect to firebase
-        mDataBusiness = FirebaseDatabase.getInstance().getReference("Restaurants");
-        mDataGeoFire = FirebaseDatabase.getInstance().getReference("GeoFire");
-
     }
 
     public void openMapsActivity() {
@@ -346,18 +388,26 @@ public class AddBusinessActivity extends AppCompatActivity {
     }
 
     private boolean validateData() {
-        boolean error;
         certficateString = certificateEdit.getText().toString().trim();
         phoneString = phoneEdit.getText().toString().trim();
         startString = startEdit.getText().toString();
         endString = endEdit.getText().toString();
         etdString = etdEdit.getText().toString().trim();
+        scoreString = scoreTV.getText().toString();
 
         if (savedPlace == null) {
             locationLayout.setError("Location can't be empty");
             error = true;
         } else {
             locationLayout.setError(null);
+            error = false;
+        }
+
+        if (scoreString.equals("Retrieving score...")) {
+            scoreLayout.setError("Please wait to retrieve score from database");
+            return error = true;
+        } else {
+            scoreLayout.setError(null);
             error = false;
         }
 
@@ -424,6 +474,7 @@ public class AddBusinessActivity extends AppCompatActivity {
     private void saveInformation() {
         nameString = nameEdit.getText().toString();
         urlString = urlEdit.getText().toString();
+
         l.add(savedLat);
         l.add(savedLong);
         g = geoHash.getGeoHashString();
@@ -439,7 +490,7 @@ public class AddBusinessActivity extends AppCompatActivity {
         String container = containerList.getSelectedItem().toString();
         Business businessInfo = new Business(nameString, namePlace, savedPlace,
                 l, certficateString, cuisine, phoneString, urlString, startString,
-                endString, order, contact, etdString, item, container, payment);
+                endString, order, contact, etdString, item, container, payment, scoreString);
         GeoEvents geoEvents = new GeoEvents(l, g);
         DatabaseReference addData = mDataBusiness.push();
         String key = addData.getKey();

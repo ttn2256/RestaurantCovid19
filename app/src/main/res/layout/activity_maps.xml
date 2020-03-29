@@ -65,6 +65,14 @@
                 android:id="@+id/businessName"/>
 
             <Button
+                android:id="@+id/scoreSafe"
+                android:layout_marginTop="5dp"
+                android:layout_width="60dp"
+                android:layout_marginLeft="267dp"
+                android:layout_height="60dp"
+                android:layout_alignLeft="@+id/businessName"/>
+
+            <Button
                 android:id="@+id/safetyGrade"
                 android:layout_marginTop="5dp"
                 android:layout_width="60dp"

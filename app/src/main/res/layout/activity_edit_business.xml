@@ -26,11 +26,45 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         </com.google.android.material.textfield.TextInputLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/locationLayOut"
+            android:id="@+id/relative">
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="Safety Score: "
+                android:textSize="18dp"
+                android:id="@+id/scoreText" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:textSize="18dp"
+                android:layout_marginLeft="150dp"
+                android:layout_alignLeft="@+id/scoreText"
+                android:id="@+id/scoreTV" />
+
+        </RelativeLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/scoreLayOut"
+            android:layout_below="@+id/relative"
+            app:errorEnabled="true"
+            android:padding="10dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/editNameLayOut"
-            android:layout_below="@+id/locationLayOut"
+            android:layout_below="@+id/scoreLayOut"
             android:layout_marginTop="10dp"
             app:errorEnabled="true"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -55,7 +89,7 @@
             <androidx.appcompat.widget.AppCompatEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Food Certificate"
+                android:hint="Food Service License"
                 android:padding="10dp"
                 android:id="@+id/certificate" />
         </com.google.android.material.textfield.TextInputLayout>

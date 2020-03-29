@@ -19,15 +19,17 @@ public class Business {
     public boolean singleServiceItem;
     public String containerUsed;
     public List<String> payment;
+    public String safetyScore;
 
     public Business() {
 
     }
 
     public Business(String name, String locationName, String address, List<Double> l,
-                    String cert, String cuisine, String phone, String url, String start, String end,
-                    boolean orderFromCar, boolean contactLess, String etd, boolean singleServiceItem,
-                    String containerUsed, List<String> payment) {
+                    String cert, String cuisine, String phone, String url, String start,
+                    String end, boolean orderFromCar, boolean contactLess, String etd,
+                    boolean singleServiceItem, String containerUsed, List<String> payment,
+                    String safetyScore) {
         this.name = name;
         this.locationName = locationName;
         this.address = address;
@@ -44,6 +46,15 @@ public class Business {
         this.singleServiceItem = singleServiceItem;
         this.containerUsed = containerUsed;
         this.payment = payment;
+        this.safetyScore = safetyScore;
+    }
+
+    public String getSafetyScore() {
+        return safetyScore;
+    }
+
+    public void setSafetyScore(String safetyScore) {
+        this.safetyScore = safetyScore;
     }
 
     public String getName() {

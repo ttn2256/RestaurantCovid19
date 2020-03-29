@@ -84,7 +84,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button btnEditInfo;
     private SlidingUpPanelLayout dragLayout;
     private TextView name, cuisine;
-    private Button safetyGrade;
+    private Button safetyGrade, scoreSafe;
     private ListView listInfo;
 
     @Override
@@ -98,6 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         name = findViewById(R.id.businessName);
         cuisine = findViewById(R.id.cuisine);
         safetyGrade = findViewById(R.id.safetyGrade);
+        scoreSafe = findViewById(R.id.scoreSafe);
         listInfo = findViewById(R.id.listInfo);
 
         dragLayout = findViewById(R.id.sliding_layout);
@@ -268,6 +269,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     } else {
                         name.setText(business.name);
                     }
+                    //display safty score
+
+                    if (business.safetyScore.equals("N/A")) {
+                        scoreSafe.setBackgroundColor(getResources().getColor(R.color.quantum_grey));
+                        scoreSafe.setTextSize(20);
+                    } else {
+                        if (Integer.parseInt(business.safetyScore) > 80) {
+                            scoreSafe.setBackgroundColor(getResources().getColor(R.color.quantum_googgreen));
+                        } else if (Integer.parseInt(business.safetyScore) > 60 &&
+                                Integer.parseInt(business.safetyScore) < 80 ) {
+                            scoreSafe.setBackgroundColor(getResources().getColor(R.color.quantum_yellow));
+                        } else if (Integer.parseInt(business.safetyScore) < 60) {
+                            scoreSafe.setBackgroundColor(getResources().getColor(R.color.quantum_googred));
+                        }
+                        scoreSafe.setTextSize(30);
+                    }
+
+                    scoreSafe.setText(business.safetyScore);
+                    scoreSafe.setTextColor(getResources().getColor(R.color.quantum_white_100));
+
+
+                    // display food service license
                     if (business.cert.equals("A")) {
                         safetyGrade.setBackgroundColor(getResources().getColor(R.color.quantum_googgreen));
                     } else if (business.cert.equals("B")) {
@@ -277,10 +300,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     } else {
                         safetyGrade.setBackgroundColor(getResources().getColor(R.color.quantum_grey));
                     }
-                    cuisine.setText(business.cuisine);
+
                     safetyGrade.setText(business.cert);
                     safetyGrade.setTextSize(30);
                     safetyGrade.setTextColor(getResources().getColor(R.color.quantum_white_100));
+
+                    cuisine.setText(business.cuisine);
                     // get name, location and category from firebase
                     String address = "", phone = "", url = "", hours = "", driveThru = "", contactLess = "",
                             singleItem = "", payment = "", etd = "";
@@ -376,9 +401,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnEditInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                 /* usersData.child(id(MapsActivity.this)).child("eventCurrent").child(marker.getTitle()).setValue(false);
-                eventCapData.child(marker.getTitle()).child(id(MapsActivity.this)).setValue(true);
-                eventCapData.child(marker.getTitle()).child(id(MapsActivity.this)).setValue(true);*/
                 openEditBusinessActivity(marker.getTitle());
             }
         });

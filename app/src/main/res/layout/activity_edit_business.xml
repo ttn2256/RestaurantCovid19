@@ -276,11 +276,11 @@
             android:padding="10dp"/>
 
         <Button
-            android:id="@+id/btnRegister"
+            android:id="@+id/btnUpdate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/chipGroup"
-            android:text= "Add restaurant information"
+            android:text= "Update restaurant information"
             android:layout_marginBottom="30dp"/>
 
     </RelativeLayout>

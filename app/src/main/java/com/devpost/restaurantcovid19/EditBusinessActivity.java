@@ -146,9 +146,12 @@ public class EditBusinessActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 AlertDialog alertDialog = new AlertDialog.Builder(EditBusinessActivity.this).create();
-                alertDialog.setTitle("Information");
-                //TODO: Ahbi add messages for single items service information
-                alertDialog.setMessage("");
+                alertDialog.setTitle("Single Service Articles Information");
+                alertDialog.setMessage(
+                        "Single-service articles means tableware, carry-out utensils, and other items such as bags, " +
+                        "containers, placemats, stirrers, straws, " +
+                        "toothpicks, and wrappers that are designed and constructed for one time, " +
+                        "one person use after which they are intended for discard.");
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -163,9 +166,9 @@ public class EditBusinessActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 AlertDialog alertDialog = new AlertDialog.Builder(EditBusinessActivity.this).create();
-                alertDialog.setTitle("Information");
-                //TODO: Ahbi add messages for contact less information
-                alertDialog.setMessage("");
+                alertDialog.setTitle("Contactless Delivery Information");
+                alertDialog.setMessage("Customers can indicate where they would prefer their food order to be left by a " +
+                                        " delivery person: whether that’s by the front door, at a reception desk or on a bench.");
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -223,8 +226,8 @@ public class EditBusinessActivity extends AppCompatActivity {
         cuisineList.setAdapter(adapter);
 
         //create a list of items for the spinner.
-        //TODO: Ahbi update containers uses list
-        containers = new String[]{"None", "Plastic", "Paper"};
+        containers = new String[]{"Recycled Paperboard", "Bio Plastic",
+                "Plastic #2", "Plastic #5", "Brown Cardboard"};
         ArrayAdapter<String> adapter1 = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, containers);
         containerList.setAdapter(adapter1);
@@ -502,7 +505,6 @@ public class EditBusinessActivity extends AppCompatActivity {
             error = false;
         }
 
-        Log.i("error", String.valueOf(error));
         return error;
     }
 

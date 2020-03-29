@@ -145,8 +145,7 @@ public class AddBusinessActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 AlertDialog alertDialog = new AlertDialog.Builder(AddBusinessActivity.this).create();
-                alertDialog.setTitle("Information");
-                //TODO: Ahbi add messages for single items service information
+                alertDialog.setTitle("Single Service Articles Information");
                 alertDialog.setMessage(
                         "Single-service articles means tableware, carry-out utensils, and other items such as bags, " +
                         "containers, placemats, stirrers, straws, " +
@@ -166,9 +165,9 @@ public class AddBusinessActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 AlertDialog alertDialog = new AlertDialog.Builder(AddBusinessActivity.this).create();
-                alertDialog.setTitle("Information");
-                //TODO: Ahbi add messages for contact less information
-                alertDialog.setMessage("");
+                alertDialog.setTitle("Contactless Delivery Information");
+                alertDialog.setMessage("Customers can indicate where they would prefer their food order to be left by a " +
+                        " delivery person: whether that’s by the front door, at a reception desk or on a bench.");
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -226,7 +225,7 @@ public class AddBusinessActivity extends AppCompatActivity {
         cuisineList.setAdapter(adapter);
 
         //create a list of items for the spinner.
-        String[] containers = new String[]{"None", "Recycled Paperboard", "Bio Plastic",
+        String[] containers = new String[]{"Recycled Paperboard", "Bio Plastic",
         "Plastic #2", "Plastic #5", "Brown Cardboard"};
         ArrayAdapter<String> adapter1 = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, containers);

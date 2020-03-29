@@ -59,14 +59,15 @@ public class EditBusinessActivity extends AppCompatActivity {
     private GeoHash geoHash;
     private Button btnUpdate;
     private Spinner cuisineList, containerList;
-    private ChipGroup chipGroup;
+    private ChipGroup chipGroup, closedDay;
     private List<String> payment = new ArrayList<>();
+    private List<String> closedDate = new ArrayList<>();
     private Switch contactSwitch, itemSwitch, orderSwitch;
     private boolean contact = false, order = false, item = false;
     private RelativeLayout hidden;
     private TimePickerDialog timePickerDialog;
     private EditText nameEdit, certificateEdit, phoneEdit, urlEdit, startEdit, endEdit, etdEdit;
-    private ImageButton btnContactLessInfo, btnSingleServiceInfo;
+    private ImageButton btnContactLessInfo, btnSingleServiceInfo, btnHoursInfo;
     private Calendar calendar;
     private int currentHour, currentMinute;
     private String nameString, certficateString, phoneString,
@@ -75,8 +76,9 @@ public class EditBusinessActivity extends AppCompatActivity {
             startLayout, endLayout;
     private List<Double> l = new ArrayList<>();
     private List<String> chipData = new ArrayList<>();
+    private List<String> closedData = new ArrayList<>();
     private DatabaseReference mDataBusiness, mDataGeoFire, mDataScore;
-    private String[] methods = null, items = null, containers = null;
+    private String[] methods = null, items = null, containers = null, days = null;
     private String restaurantID;
     private TextView scoreTV;
     private String[] placeSplit;
@@ -95,6 +97,7 @@ public class EditBusinessActivity extends AppCompatActivity {
         cuisineList = findViewById(R.id.listCuisines);
         containerList = findViewById(R.id.containerList);
         chipGroup = findViewById(R.id.chipGroup);
+        closedDay = findViewById(R.id.closedDay);
         contactSwitch = findViewById(R.id.contactSwitch);
         itemSwitch = findViewById(R.id.itemSwitch);
         orderSwitch = findViewById(R.id.orderSwitch);
@@ -108,6 +111,7 @@ public class EditBusinessActivity extends AppCompatActivity {
         etdEdit = findViewById(R.id.etd);
         btnContactLessInfo = findViewById(R.id.contactLessInfo);
         btnSingleServiceInfo = findViewById(R.id.serviceItemsInfo);
+        btnHoursInfo = findViewById(R.id.hoursInfo);
         scoreTV = findViewById(R.id.scoreTV);
 
         hidden = findViewById(R.id.hiddenLayout);
@@ -179,6 +183,23 @@ public class EditBusinessActivity extends AppCompatActivity {
             }
         });
 
+        btnHoursInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(EditBusinessActivity.this).create();
+                alertDialog.setTitle("Hours Setting Information");
+                alertDialog.setMessage("Start and end hours will be set for all 7 days of the week, if the restaurant is closed some days of " +
+                        "the week, the user can select the closed day options below");
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
+
         //contactSwitch function
         contactSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -232,6 +253,14 @@ public class EditBusinessActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_dropdown_item, containers);
         containerList.setAdapter(adapter1);
 
+        //create a list of closed day
+        days = new String[]{"Monday", "Tuesday",
+                "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
+        // display list of closed days in chip
+        for(String day : days) {
+            dateDisplay(day);
+        }
 
         // get API key
         String apiKey = "AIzaSyC5tVRK4noWWEw7LgrfRpZ2LvM_otKNt7A";
@@ -427,7 +456,16 @@ public class EditBusinessActivity extends AppCompatActivity {
                     for(String method : methods) {
                         chipDisplay(method);
                     }
+
+                    for (String close : business.closedDate) {
+                        closedData.add(close);
+                    }
+
+                    for (String day: days) {
+                        dateDisplay(day);
+                    }
                 }
+
             }
 
             @Override
@@ -509,6 +547,35 @@ public class EditBusinessActivity extends AppCompatActivity {
     }
 
 
+    private void dateDisplay(final String tag) {
+        final Chip chip = new Chip(EditBusinessActivity.this);
+        ChipDrawable chipDrawable = ChipDrawable.createFromAttributes(EditBusinessActivity.this,
+                null, 0, R.style.Widget_MaterialComponents_Chip_Entry);
+        chip.setChipDrawable(chipDrawable);
+        chip.setCheckable(true);
+        chip.setClickable(true);
+        chip.setCloseIconVisible(false);
+        chip.setPadding(60, 10, 60,10);
+        chip.setText(tag);
+
+        if (closedData != null && !closedData.isEmpty() && closedData.contains(tag)) {
+            chip.setChecked(true);
+            closedDate.add(tag);
+        }
+
+        chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b == true) {
+                    closedDate.add(((ChipDrawable) chip.getChipDrawable()).getText().toString());
+                } else {
+                    closedDate.remove(((ChipDrawable) chip.getChipDrawable()).getText().toString());
+                }
+            }
+        });
+        closedDay.addView(chip);
+    }
+
     private void chipDisplay(final String tag) {
         final Chip chip = new Chip(EditBusinessActivity.this);
         ChipDrawable chipDrawable = ChipDrawable.createFromAttributes(EditBusinessActivity.this,
@@ -545,11 +612,25 @@ public class EditBusinessActivity extends AppCompatActivity {
         l.add(savedLong);
         g = geoHash.getGeoHashString();
 
+        // add place holder to the firebase
+        if (closedDate.isEmpty()) {
+            closedDate.add("");
+        }
+
+        // add place holder to the firebase
+        if(payment.isEmpty()) {
+            payment.add("");
+        }
+
+        if (urlString == null || urlString.isEmpty()) {
+            urlString = "";
+        }
+
         String cuisine = cuisineList.getSelectedItem().toString();
         String container = containerList.getSelectedItem().toString();
         Business businessInfo = new Business(nameString, namePlace, savedPlace,
                 l, certficateString, cuisine, phoneString, urlString, startString,
-                endString, order, contact, etdString, item, container, payment, scoreString);
+                endString, order, contact, etdString, item, container, payment, scoreString, closedDate);
         GeoEvents geoEvents = new GeoEvents(l, g);
         // add event to database
         mDataBusiness.child(restaurantID).setValue(businessInfo);

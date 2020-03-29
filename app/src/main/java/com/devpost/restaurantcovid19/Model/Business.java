@@ -20,6 +20,7 @@ public class Business {
     public String containerUsed;
     public List<String> payment;
     public String safetyScore;
+    public List<String> closedDate;
 
     public Business() {
 
@@ -29,7 +30,7 @@ public class Business {
                     String cert, String cuisine, String phone, String url, String start,
                     String end, boolean orderFromCar, boolean contactLess, String etd,
                     boolean singleServiceItem, String containerUsed, List<String> payment,
-                    String safetyScore) {
+                    String safetyScore, List<String> closedDate) {
         this.name = name;
         this.locationName = locationName;
         this.address = address;
@@ -47,6 +48,15 @@ public class Business {
         this.containerUsed = containerUsed;
         this.payment = payment;
         this.safetyScore = safetyScore;
+        this.closedDate = closedDate;
+    }
+
+    public List<String> getClosedDate() {
+        return closedDate;
+    }
+
+    public void setClosedDate(List<String> closedDate) {
+        this.closedDate = closedDate;
     }
 
     public String getSafetyScore() {

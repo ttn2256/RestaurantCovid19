@@ -122,6 +122,11 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        // super.onBackPressed();
+    }
+
     /**
      * Sending a user to map view upon successful registration/login
      */

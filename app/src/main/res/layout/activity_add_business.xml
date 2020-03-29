@@ -171,12 +171,39 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <ImageButton
+            android:id="@+id/hoursInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:src="@drawable/ic_information"
+            android:layout_below="@id/urlLayOut"
+            android:layout_marginTop="15dp"
+            android:layout_alignLeft="@id/startTimeLayOut"
+            android:layout_marginLeft="365dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Closed Date: "
+            android:id="@+id/closed"
+            android:layout_below="@id/startTimeLayOut"
+            android:layout_marginLeft="5dp"
+            android:textSize="18.5dp" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/closedDay"
+            android:layout_below="@+id/closed"
+            android:padding="10dp"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Drive Thru: "
             android:id="@+id/order"
-            android:layout_below="@id/startTimeLayOut"
+            android:layout_below="@id/closedDay"
             android:layout_marginLeft="5dp"
             android:textSize="18.5dp" />
 
@@ -184,7 +211,7 @@
         <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/startTimeLayOut"
+            android:layout_below="@+id/closedDay"
             android:id="@+id/orderSwitch"
             android:layout_alignLeft="@+id/order"
             android:layout_marginLeft="300dp"/>

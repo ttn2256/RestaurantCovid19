@@ -74,6 +74,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleMap.OnMarkerClickListener, GeoQueryEventListener {
@@ -93,7 +94,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button foodGrade, scoreSafe;
     private ListView listInfo;
     private Calendar calendar;
-    private String current;
+    private String current, currentDay;
     private long currentTime;
 
     private FirebaseUser currentUser;
@@ -186,6 +187,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         try {
             Date timeT = sdf.parse(current);
             currentTime = timeT.getTime();
+            currentDay = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(calendar.getTime());
+            Log.i("Today's date", currentDay);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -403,7 +406,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         } else if (Integer.parseInt(business.safetyScore) < 60) {
                             scoreSafe.setBackgroundColor(getResources().getColor(R.color.quantum_googred));
                         }
-                        scoreSafe.setTextSize(30);
+                        if (Integer.parseInt(business.safetyScore) == 100) {
+                            scoreSafe.setTextSize(20);
+                        } else {
+                            scoreSafe.setTextSize(30);
+                        }
                     }
 
                     scoreSafe.setText(business.safetyScore);
@@ -431,7 +438,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             singleItem = "", payment = "", etd = "";
                     address = business.address;
                     phone = business.phone;
-                    url = business.url;
+
+                    if (business.url == null || business.url.isEmpty()) {
+                        url = "";
+                    } else {
+                        if (!business.url.startsWith("www.")) {
+                            url = "https://www." + business.url.toLowerCase();
+                        } else if (!business.url.startsWith("https://")){
+                            url = "https://" + business.url.toLowerCase();
+                        }
+                    }
+
                     hours = business.start + " - " + business.end;
 
                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
@@ -441,7 +458,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         long startT = timeS.getTime();
                         long endT = timeE.getTime();
 
-                        if (currentTime > startT && currentTime < endT) {
+                        if (currentTime > startT && currentTime < endT
+                                && !business.closedDate.contains(currentDay)) {
                             openingHours.setText("[OPEN]");
                             openingHours.setTextColor(getResources().getColor(R.color.quantum_googgreen));
                         } else {
@@ -487,7 +505,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
 
 
-                    if (business.url.equals("https://www.")) {
+                    if (business.url.equals("")) {
                         final String[] restaurantInfo = {address, phone, hours, driveThru, contactLess, payment};
                         Integer[] imgid = {
                                 R.drawable.ic_location,

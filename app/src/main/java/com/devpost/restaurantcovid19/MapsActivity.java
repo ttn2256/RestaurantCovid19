@@ -414,9 +414,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for (DataSnapshot s : dataSnapshot.getChildren()) {
                     final Business business = s.getValue(Business.class);
                     if (business.locationName != null || !business.locationName.isEmpty()) {
-                        name.setText(business.locationName);
+                        String nametoSetLoc = business.locationName.length() >=20
+                                ? business.locationName.substring(0,20)+"...":business.locationName;
+                        name.setText(nametoSetLoc);
                     } else {
-                        name.setText(business.name);
+                        String nametoSetName = business.name.length() >=20
+                                ? business.name.substring(0,20)+"...":business.name;
+                        name.setText(nametoSetName);
                     }
                     //display safety score
                     if (business.safetyScore.equals("N/A")) {
@@ -443,14 +447,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                     // display food service license
-                    if (business.cert.equals("A")) {
+                    if (business.cert.equalsIgnoreCase("A")) {
                         foodGrade.setBackgroundColor(getResources().getColor(R.color.quantum_googgreen));
-                    } else if (business.cert.equals("B")) {
+                    } else if (business.cert.equalsIgnoreCase("B")) {
                         foodGrade.setBackgroundColor(getResources().getColor(R.color.quantum_yellow));
-                    } else if (business.cert.equals("C")) {
+                    } else if (business.cert.equalsIgnoreCase("C")) {
                         foodGrade.setBackgroundColor(getResources().getColor(R.color.quantum_googred));
                     } else {
-                        foodGrade.setBackgroundColor(getResources().getColor(R.color.quantum_grey));
+                        foodGrade.setVisibility(View.GONE);
                     }
 
                     foodGrade.setText(business.cert);
@@ -765,9 +769,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         c.drawBitmap(bitmap, 4, 4, p);
         p.setXfermode(null);
         p.setStyle(Paint.Style.STROKE);
-        if (cert.equals("A")) {
+        if (cert.equalsIgnoreCase("A")) {
             p.setColor(Color.GREEN);
-        } else if (cert.equals("B")) {
+        } else if (cert.equalsIgnoreCase("B")) {
             p.setColor(Color.YELLOW);
         } else {
             p.setColor(Color.RED);

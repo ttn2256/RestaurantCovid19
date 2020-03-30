@@ -40,6 +40,8 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -85,15 +87,20 @@ public class AddBusinessActivity extends AppCompatActivity {
     private TextInputLayout nameLayout, certificateLayout, phoneLayout, locationLayout,
             startLayout, endLayout, scoreLayout;
     private List<Double> l = new ArrayList<>();
-    private DatabaseReference mDataBusiness, mDataGeoFire, mDataScore, mDataUser;
+    private DatabaseReference mDataBusiness, mDataGeoFire, mDataScore, mDataUsers;
     private TextView scoreTV;
     private boolean error = true;
     private FirebaseFirestore dbFireStore;
+    private FirebaseUser currentUser;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_business);
+
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
 
         btnRegister = findViewById(R.id.btnRegister);
         cuisineList = findViewById(R.id.listCuisines);
@@ -134,7 +141,7 @@ public class AddBusinessActivity extends AppCompatActivity {
         mDataBusiness = FirebaseDatabase.getInstance().getReference("Restaurants");
         mDataGeoFire = FirebaseDatabase.getInstance().getReference("GeoFire");
         mDataScore = FirebaseDatabase.getInstance().getReference("masterSheet");
-        mDataUser = FirebaseDatabase.getInstance().getReference("Users");
+        mDataUsers = FirebaseDatabase.getInstance().getReference("Users");
         dbFireStore = FirebaseFirestore.getInstance();
 
         //button register function
@@ -596,6 +603,8 @@ public class AddBusinessActivity extends AppCompatActivity {
         String key = addData.getKey();
         // add event to database
         addData.setValue(businessInfo);
+        // add event to user account
+        mDataUsers.child(currentUser.getUid()).child("eventCreated").child(key).setValue(true);
         // add geo information of the events into geo Fire
         mDataGeoFire.child(key).setValue(geoEvents);
     }

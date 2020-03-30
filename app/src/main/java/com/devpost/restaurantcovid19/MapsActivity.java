@@ -195,23 +195,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
 
-        Query userEventsQuery = FirebaseDatabase.getInstance().getReference("Users")
-                .child(currentUser.getUid()).child("eventCreated");
+        if (currentUser != null ) {
+            Query userEventsQuery = FirebaseDatabase.getInstance().getReference("Users")
+                    .child(currentUser.getUid()).child("eventCreated");
 
-        userEventsQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot s : dataSnapshot.getChildren()) {
-                    userEvent.add(s.getKey());
+            userEventsQuery.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot s : dataSnapshot.getChildren()) {
+                        userEvent.add(s.getKey());
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
-
+                }
+            });
+        }
     }
 
     @Override

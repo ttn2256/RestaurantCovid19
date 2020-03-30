@@ -27,6 +27,11 @@ import com.devpost.restaurantcovid19.Model.Business;
 import com.devpost.restaurantcovid19.Model.GeoEvents;
 import com.firebase.geofire.core.GeoHash;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnCanceledListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
@@ -41,10 +46,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.protobuf.StringValue;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class AddBusinessActivity extends AppCompatActivity {
@@ -72,9 +85,10 @@ public class AddBusinessActivity extends AppCompatActivity {
     private TextInputLayout nameLayout, certificateLayout, phoneLayout, locationLayout,
             startLayout, endLayout, scoreLayout;
     private List<Double> l = new ArrayList<>();
-    private DatabaseReference mDataBusiness, mDataGeoFire, mDataScore;
+    private DatabaseReference mDataBusiness, mDataGeoFire, mDataScore, mDataUser;
     private TextView scoreTV;
     private boolean error = true;
+    private FirebaseFirestore dbFireStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +134,8 @@ public class AddBusinessActivity extends AppCompatActivity {
         mDataBusiness = FirebaseDatabase.getInstance().getReference("Restaurants");
         mDataGeoFire = FirebaseDatabase.getInstance().getReference("GeoFire");
         mDataScore = FirebaseDatabase.getInstance().getReference("masterSheet");
+        mDataUser = FirebaseDatabase.getInstance().getReference("Users");
+        dbFireStore = FirebaseFirestore.getInstance();
 
         //button register function
         btnRegister.setOnClickListener(new View.OnClickListener() {
@@ -280,34 +296,38 @@ public class AddBusinessActivity extends AppCompatActivity {
                 placeSplit = savedPlace.split(",");
                 street = placeSplit[0];
                 scoreTV.setText("Retrieving score...");
-                Query scoreDataQuery = mDataScore.orderByChild("2").equalTo(street);
-                scoreDataQuery.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot s : dataSnapshot.getChildren()){
-                                if (s.child("12").getValue().getClass().equals(String.class)) {
-                                    String score = s.child("12").getValue(String.class);
-                                    if (score.isEmpty()) {
-                                        scoreTV.setText("N/A");
-                                    } else {
-                                        scoreTV.setText(score);
-                                    }
-                                } else {
-                                    Long score = s.child("12").getValue(Long.class);
-                                    scoreTV.setText(String.valueOf(score));
-                                }
-                               Log.i("Data", String.valueOf(s));
 
+                CollectionReference tagRef = dbFireStore.collection("users");
+                com.google.firebase.firestore.Query tagQuery = tagRef.whereEqualTo("business_address", street)
+                        .orderBy("inspection_date").limitToLast(1);
+                tagQuery.get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if(task.getResult().isEmpty()){
+                                scoreTV.setText("N/A");
+                            } else {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    if (document.exists()) {
+                                        if (String.valueOf(document.get("inspection_score")).isEmpty())
+                                        {
+                                            scoreTV.setText("N/A");
+                                        } else {
+                                            scoreTV.setText(String.valueOf(document.get("inspection_score")));
+                                        }
+                                    } else {
+                                        scoreTV.setText("N/A");
+                                        Log.i("Score", String.valueOf(document));
+                                    }
+
+                                }
                             }
                         } else {
                             scoreTV.setText("N/A");
                         }
                     }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                    }
                 });
 
                 savedLat = place.getLatLng().latitude;

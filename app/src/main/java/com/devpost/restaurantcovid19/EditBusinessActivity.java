@@ -31,6 +31,8 @@ import com.devpost.restaurantcovid19.Model.GeoEvents;
 import com.firebase.geofire.core.GeoHash;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.util.ArrayUtils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
@@ -45,6 +47,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +89,7 @@ public class EditBusinessActivity extends AppCompatActivity {
     private TextView scoreTV;
     private String[] placeSplit;
     private boolean error = true;
+    private FirebaseFirestore dbFireStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,7 +138,7 @@ public class EditBusinessActivity extends AppCompatActivity {
         mDataBusiness = FirebaseDatabase.getInstance().getReference("Restaurants");
         mDataGeoFire = FirebaseDatabase.getInstance().getReference("GeoFire");
         mDataScore = FirebaseDatabase.getInstance().getReference("masterSheet");
-
+        dbFireStore = FirebaseFirestore.getInstance();
 
         //button update function
         btnUpdate.setOnClickListener(new View.OnClickListener() {
@@ -283,32 +290,34 @@ public class EditBusinessActivity extends AppCompatActivity {
                 placeSplit = savedPlace.split(",");
                 street = placeSplit[0];
                 scoreTV.setText("Retrieving score...");
-                Query scoreDataQuery = mDataScore.orderByChild("2").equalTo(street).limitToFirst(1);
-                scoreDataQuery.addValueEventListener(new ValueEventListener() {
+                CollectionReference tagRef = dbFireStore.collection("users");
+                com.google.firebase.firestore.Query tagQuery = tagRef.whereEqualTo("business_address", street)
+                        .orderBy("inspection_date").limitToLast(1);
+                tagQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot s : dataSnapshot.getChildren()){
-                                if (s.child("12").getValue().getClass().equals(String.class)) {
-                                    String score = s.child("12").getValue(String.class);
-                                    if (score.isEmpty()) {
-                                        scoreTV.setText("N/A");
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if(task.getResult().isEmpty()){
+                                scoreTV.setText("N/A");
+                            } else {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    if (document.exists()) {
+                                        if (String.valueOf(document.get("inspection_score")).isEmpty())
+                                        {
+                                            scoreTV.setText("N/A");
+                                        } else {
+                                            scoreTV.setText(String.valueOf(document.get("inspection_score")));
+                                        }
                                     } else {
-                                        scoreTV.setText(score);
+                                        scoreTV.setText("N/A");
+                                        Log.i("Score", String.valueOf(document));
                                     }
-                                } else {
-                                    Long score = s.child("12").getValue(Long.class);
-                                    scoreTV.setText(String.valueOf(score));
-                                }
 
+                                }
                             }
                         } else {
                             scoreTV.setText("N/A");
                         }
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
                     }
                 });
 

@@ -71,6 +71,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -96,6 +97,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Calendar calendar;
     private String current, currentDay;
     private long currentTime;
+    private List<String> userEvent = new ArrayList<>();
 
     private FirebaseUser currentUser;
     private FirebaseAuth mAuth;
@@ -192,6 +194,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
+        Query userEventsQuery = FirebaseDatabase.getInstance().getReference("Users")
+                .child(currentUser.getUid()).child("eventCreated");
+
+        userEventsQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot s : dataSnapshot.getChildren()) {
+                    userEvent.add(s.getKey());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
@@ -328,16 +347,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public boolean onMarkerClick(final Marker marker) {
-
+        Log.i("Data", String.valueOf(userEvent.contains(marker.getTitle())));
         dragLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        btnEditInfo.setVisibility(View.VISIBLE);
-        if(currentUser == null){
-            btnEditInfo.setVisibility(View.GONE);
-            ViewGroup.LayoutParams params = listInfo.getLayoutParams();
-            params.height = 1000;
-            listInfo.setLayoutParams(params);
-        }
 
+        btnEditInfo.setVisibility(View.GONE);
+        ViewGroup.LayoutParams params = listInfo.getLayoutParams();
+        params.height = 1000;
+        listInfo.setLayoutParams(params);
+
+        if (userEvent.contains(marker.getTitle())) {
+            if (btnEditInfo.getVisibility() == View.GONE) {
+                btnEditInfo.setVisibility(View.VISIBLE);
+                ViewGroup.LayoutParams params1 = listInfo.getLayoutParams();
+                params.height = 850;
+                listInfo.setLayoutParams(params1);
+            }
+        }
 
         //btn food grade display information dialog
         foodGrade.setOnClickListener(new View.OnClickListener() {

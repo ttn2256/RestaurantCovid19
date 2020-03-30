@@ -260,15 +260,6 @@ public class EditBusinessActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_dropdown_item, containers);
         containerList.setAdapter(adapter1);
 
-        //create a list of closed day
-        days = new String[]{"Monday", "Tuesday",
-                "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-
-        // display list of closed days in chip
-        for(String day : days) {
-            dateDisplay(day);
-        }
-
         // get API key
         String apiKey = "AIzaSyC5tVRK4noWWEw7LgrfRpZ2LvM_otKNt7A";
 
@@ -430,6 +421,11 @@ public class EditBusinessActivity extends AppCompatActivity {
         // display chip
         methods = new String[] {"Credit card", "Venmo", "Paypal", "Zelle",
                 "Apple Pay", "Google Pay"};
+
+        //create a list of closed day
+        days = new String[]{"Monday", "Tuesday",
+                "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
 
         // display data
         final Query locationDataQuery = FirebaseDatabase.getInstance().getReference("Restaurants")
